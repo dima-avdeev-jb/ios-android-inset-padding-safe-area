@@ -37,6 +37,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                api("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
                 api("androidx.activity:activity-compose:1.6.1")
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.9.0")
