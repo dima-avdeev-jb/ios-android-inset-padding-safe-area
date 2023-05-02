@@ -2,15 +2,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.safeGesturesPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +34,20 @@ import androidx.compose.ui.graphics.Color
 fun MainView() {
     TransparentSystemBars()
     Box(Modifier.fillMaxSize()) {
-
+        if (false) Box(
+            Modifier
+                .align(Alignment.TopCenter)
+                .background(Color.Blue.copy(alpha = 0.3f))
+                .windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.displayCutout))
+                .fillMaxWidth()
+        ) {
+            Row(Modifier.fillMaxWidth()) {
+                IconButton({}, ) {
+                    Icon(Icons.Default.ArrowBack, null)
+                }
+                Text("Application name")
+            }
+        }
         Text("displayCutout", Modifier.displayCutoutPadding().align(Alignment.TopEnd))
         Text("statusBars", Modifier.statusBarsPadding().align(Alignment.TopStart))
 
