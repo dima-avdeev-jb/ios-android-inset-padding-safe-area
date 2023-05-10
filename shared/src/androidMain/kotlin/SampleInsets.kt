@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.safeGesturesPadding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -47,15 +51,14 @@ fun SampleInsets() {
                 Text("Application name")
             }
         }
-        Text("displayCutout", Modifier.displayCutoutPadding().align(Alignment.TopEnd))
-        Text("statusBars", Modifier.statusBarsPadding().align(Alignment.TopStart))
 
-        Text("navigationBars", Modifier.navigationBarsPadding().align(Alignment.BottomCenter))
-        Text(" IME ", Modifier.imePadding().background(Color.Yellow).align(Alignment.BottomStart))
-        Text(
-            " ANIMATED ", Modifier.windowInsetsPadding(animatedInset)
-                .background(Color.Yellow).align(Alignment.BottomEnd)
-        )
+        Text("displayCutout", Modifier.windowInsetsPadding(WindowInsets.displayCutout).align(Alignment.TopEnd))
+        Text("statusBars", Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopStart))
+
+        Text("navigationBars", Modifier.windowInsetsPadding(WindowInsets.navigationBars).align(Alignment.BottomCenter))
+        Text(" IME ", Modifier.windowInsetsPadding(WindowInsets.ime).background(Color.Yellow).align(Alignment.BottomStart))
+        Text(" imeAnimationTarget ", Modifier.windowInsetsPadding(WindowInsets.imeAnimationTarget).background(Color.Yellow).align(Alignment.BottomCenter))
+        Text(" ANIMATED ", Modifier.windowInsetsPadding(animatedInset).background(Color.Yellow).align(Alignment.BottomEnd))
 
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             var textStr by remember { mutableStateOf("TextField to show keyboard") }
@@ -63,7 +66,7 @@ fun SampleInsets() {
 
             Text(
                 "safeGestures",
-                Modifier.fillMaxWidth().safeGesturesPadding().background(Color.LightGray)
+                Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeGestures).background(Color.LightGray)
             )
         }
     }
@@ -79,9 +82,6 @@ fun SampleInsets() {
         }
     }
 
-    Modifier.windowInsetsPadding(WindowInsets.ime)
-    Modifier.windowInsetsPadding(WindowInsets.displayCutout)
-    Modifier.windowInsetsPadding(WindowInsets.statusBars)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
