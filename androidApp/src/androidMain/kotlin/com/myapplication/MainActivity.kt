@@ -1,6 +1,7 @@
 package com.myapplication
 
 import MainView
+import TransparentSystemBars
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            TransparentSystemBars()
             MainView()
         }
     }
