@@ -2,6 +2,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicText
@@ -26,6 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.random.Random
 
+enum class Theme {
+    SystemTheme,
+    DarkTheme,
+    LightTheme,
+}
+
 enum class Top {
     Empty,
     WhatsApp,
@@ -37,7 +44,8 @@ enum class Content {
     Empty,
     LazyColumn,
     ScaffoldPadding,
-    Insets,
+    KeyboardInset,
+    SafeAreaInset,
     Chat,
     BigTextField,
 }
@@ -47,11 +55,32 @@ enum class Bottom {
     Tabs,
 }
 
+@Composable
+fun WithMaterialThemeAndScaffold() {
+    val themeState = remember { mutableStateOf(Theme.SystemTheme) }
+    val isDarkTheme = when(themeState.value) {
+        Theme.SystemTheme -> isSystemInDarkTheme()
+        Theme.DarkTheme -> true
+        Theme.LightTheme -> false
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        MaterialTheme(colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()) {
+            WithScaffold()
+        }
+        Box(Modifier.fillMaxSize()) {
+            SwitchStates(Theme.values(), themeState.value, Modifier.align(Alignment.CenterStart)) {
+                themeState.value = it
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WithScaffold() {
-    val topState = remember { mutableStateOf(Top.Settings) }
-    val contentState = remember { mutableStateOf(Content.Insets) }
+    val topState = remember { mutableStateOf(Top.Telegram) }
+    val contentState = remember { mutableStateOf(Content.KeyboardInset) }
     val bottomState = remember { mutableStateOf(Bottom.Empty) }
 
     val appBarState = rememberTopAppBarState()
@@ -70,6 +99,7 @@ fun WithScaffold() {
                         title = { Text("Settings") },
                         scrollBehavior = scrollBehavior
                     )
+
                     else -> {}
                 }
             }
@@ -99,6 +129,7 @@ fun WithScaffold() {
                     }
                 }
             }
+
             Content.ScaffoldPadding -> {
                 Box(Modifier.fillMaxSize()) {
                     Text(
@@ -115,33 +146,21 @@ fun WithScaffold() {
                     )
                 }
             }
+
             Content.Chat -> {}
             Content.BigTextField -> {}
             else -> {}
         }
     }
 
-    if (contentState.value == Content.Insets) {
-        Box(Modifier.fillMaxSize()) {
-            Box(
-                Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars
-//                    .union(WindowInsets.displayCutout)
-                )
-                    .background(brush = Brush.verticalGradient(List(10) {
-                        if (it % 2 == 0) Color.Red.copy(0.2f) else Color.Blue.copy(0.2f)
-                    }))
-            )
-            Text(
-                "ime (keyboard) inset",
-                Modifier.align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.ime)
-                    .background(Color.Green.copy(0.5f))
-            )
-            KeyboardManipulator(Modifier.align(Alignment.Center))
-        }
+    if (contentState.value == Content.KeyboardInset) {
+        ContentKeyboardInset()
+    }
+    if (contentState.value == Content.SafeAreaInset) {
+        ContentSafeAreaInset()
     }
 
-    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)) {
         SwitchStates(Top.values(), topState.value, Modifier.align(Alignment.TopEnd)) {
             topState.value = it
         }
@@ -155,18 +174,34 @@ fun WithScaffold() {
 
 }
 
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun KeyboardManipulator(modifier: Modifier = Modifier) {
+fun ContentKeyboardInset() = Box(Modifier.fillMaxSize()) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    Column(modifier) {
+    Column(Modifier.align(Alignment.Center)) {
         BasicText(
             "Hide keyboard",
             Modifier.clickable { keyboardController?.hide() }.focusable(true)
-                .background(Color.Red.copy(0.3f))
+                .background(Color.Red.copy(0.5f))
         )
         BasicTextField("Show keyboard", {}, Modifier.background(Color.Green.copy(0.3f)))
     }
+    Text(
+        "ime (keyboard) inset",
+        Modifier.align(Alignment.BottomCenter)
+            .windowInsetsPadding(WindowInsets.ime)
+            .background(Color.Green.copy(0.5f))
+    )
+}
+
+@Composable
+fun ContentSafeAreaInset() = Box(Modifier.fillMaxSize().background(Color.Red.copy(0.3f))) {
+    Box(
+        Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.commonSafeArea)
+            .background(Color.Green.copy(0.5f))
+    )
 }
 
 @Composable
