@@ -2,115 +2,157 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
+import kotlin.random.Random
 
 enum class Top {
+    Empty,
     WhatsApp,
     Telegram,
-    Empty,
+    Settings,
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+enum class Content {
+    Empty,
+    LazyColumn,
+    ScaffoldPadding,
+    Insets,
+    Chat,
+    BigTextField,
+}
+
+enum class Bottom {
+    Empty,
+    Tabs,
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WithScaffold() {
-    var topState by remember { mutableStateOf(Top.Telegram) }
+    val topState = remember { mutableStateOf(Top.Settings) }
+    val contentState = remember { mutableStateOf(Content.Insets) }
+    val bottomState = remember { mutableStateOf(Bottom.Empty) }
+
+    val appBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
     androidx.compose.material3.Scaffold(
         topBar = {
             Box(
                 Modifier.background(
-                    Brush.horizontalGradient(listOf(Color.Blue.copy(0.4f), Color.Green.copy(0.4f)))
+                    Brush.horizontalGradient(listOf(Color(0xFFAAFFAA), Color(0xFFAAAAFF)))
                 )
             ) {
-                when (topState) {
-                    Top.WhatsApp -> {
-                        WhatsAppTop()
-                    }
-
-                    Top.Telegram -> {
-                        TelegramTop()
-                    }
-
-                    Top.Empty -> {
-
-                    }
+                when (topState.value) {
+                    Top.WhatsApp -> WhatsAppTop()
+                    Top.Telegram -> TelegramTop()
+                    Top.Settings -> MediumTopAppBar(
+                        title = { Text("Settings") },
+                        scrollBehavior = scrollBehavior
+                    )
+                    else -> {}
                 }
             }
         },
         bottomBar = {
-            BottomAppBar() {
-                Box(
-                    Modifier.height(50.dp)
-                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                        .fillMaxWidth().background(Color.White.copy(0.4f))
-                )
-            }
-        },
-    ) {
-        Box(Modifier.fillMaxSize()) {
-            Box(Modifier.fillMaxSize().padding(it)) {
-                Box(
-                    Modifier.size(50.dp).align(Alignment.BottomEnd)
-                        .background(Color.Yellow.copy(0.5f))
-                )
-                Row(Modifier.align(Alignment.Center).fillMaxWidth()) {
-                    KeyboardManipulator()
-                    SwitchStates(Top.values(), topState) { topState = it }
+            when (bottomState.value) {
+                Bottom.Empty -> {}
+                Bottom.Tabs -> BottomAppBar {
+                    Box(
+                        Modifier.height(50.dp)
+                            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                            .fillMaxWidth().background(Color.White.copy(0.4f))
+                    )
                 }
             }
-            Box(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.ime)
-                    .background(Color.Green.copy(0.5f))
-                    .size(140.dp)
-            )
+        },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+    ) { innerPadding ->
+        when (contentState.value) {
+            Content.LazyColumn -> {
+                LazyColumn(contentPadding = innerPadding) {
+                    items(21) {
+                        Box(
+                            Modifier.height(100.dp).fillMaxWidth()
+                                .background(Color(Random.nextInt()).copy(0.2f))
+                        ) { Text("Lazy item $it") }
+                    }
+                }
+            }
+            Content.ScaffoldPadding -> {
+                Box(Modifier.fillMaxSize()) {
+                    Text(
+                        "Scaffold innerPadding from top",
+                        Modifier.align(Alignment.TopStart)
+                            .padding(innerPadding)
+                            .background(Color.Yellow.copy(0.5f))
+                    )
+                    Text(
+                        "Scaffold innerPadding from bottom",
+                        Modifier.align(Alignment.BottomStart)
+                            .padding(innerPadding)
+                            .background(Color.Yellow.copy(0.5f))
+                    )
+                }
+            }
+            Content.Chat -> {}
+            Content.BigTextField -> {}
+            else -> {}
         }
     }
+
+    if (contentState.value == Content.Insets) {
+        Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars
+//                    .union(WindowInsets.displayCutout)
+                )
+                    .background(brush = Brush.verticalGradient(List(10) {
+                        if (it % 2 == 0) Color.Red.copy(0.2f) else Color.Blue.copy(0.2f)
+                    }))
+            )
+            Text(
+                "ime (keyboard) inset",
+                Modifier.align(Alignment.BottomCenter)
+                    .windowInsetsPadding(WindowInsets.ime)
+                    .background(Color.Green.copy(0.5f))
+            )
+            KeyboardManipulator(Modifier.align(Alignment.Center))
+        }
+    }
+
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
+        SwitchStates(Top.values(), topState.value, Modifier.align(Alignment.TopEnd)) {
+            topState.value = it
+        }
+        SwitchStates(Content.values(), contentState.value, Modifier.align(Alignment.CenterEnd)) {
+            contentState.value = it
+        }
+        SwitchStates(Bottom.values(), bottomState.value, Modifier.align(Alignment.BottomEnd)) {
+            bottomState.value = it
+        }
+    }
+
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -128,25 +170,20 @@ fun KeyboardManipulator(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun <T> SwitchStates(states: Array<T>, current: T, onChange: (T) -> Unit) {
+fun <T> SwitchStates(states: Array<T>, current: T, modifier: Modifier, onChange: (T) -> Unit) {
     val expanded = remember { mutableStateOf(false) }
-    Text(current.toString(), Modifier.clickable { expanded.value = !expanded.value })
-    if (expanded.value) {
-        Popup(onDismissRequest = { expanded.value = false }) {
-            Box(Modifier.fillMaxSize().background(Color.Black.copy(0.5f))) {
-                Column(Modifier.background(Color.LightGray).align(Alignment.Center)) {
-                    states.forEach {
-                        Text(
-                            it.toString(),
-                            Modifier.clickable {
-                                expanded.value = false
-                                onChange(it)
-                            }.padding(2.dp).border(1.dp, Color.Blue).padding(2.dp)
-                                .background(Color.Blue.copy(0.3f))
-                        )
-                    }
+    Column(modifier.background(Color.LightGray).width(IntrinsicSize.Min)) {
+        states.forEach {
+            Text(
+                it.toString(),
+                Modifier.clickable {
+                    expanded.value = false
+                    onChange(it)
                 }
-            }
+                    .fillMaxWidth()
+                    .padding(2.dp).border(1.dp, Color.Blue).padding(2.dp)
+                    .background(if (current == it) Color.Gray else Color.Blue.copy(0.3f))
+            )
         }
     }
 }
