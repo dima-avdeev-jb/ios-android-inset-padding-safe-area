@@ -37,12 +37,12 @@ enum class Top {
     Empty,
     WhatsApp,
     Telegram,
-    Settings,
+    CollapsingTopBar,
 }
 
 enum class Content {
     Empty,
-    LazyColumn,
+    Scrollable,
     ScaffoldPadding,
     KeyboardInset,
     SafeAreaInset,
@@ -58,7 +58,7 @@ enum class Bottom {
 @Composable
 fun WithMaterialThemeAndScaffold() {
     val themeState = remember { mutableStateOf(Theme.SystemTheme) }
-    val isDarkTheme = when(themeState.value) {
+    val isDarkTheme = when (themeState.value) {
         Theme.SystemTheme -> isSystemInDarkTheme()
         Theme.DarkTheme -> true
         Theme.LightTheme -> false
@@ -87,21 +87,15 @@ fun WithScaffold() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
     androidx.compose.material3.Scaffold(
         topBar = {
-            Box(
-                Modifier.background(
-                    Brush.horizontalGradient(listOf(Color(0xFFAAFFAA), Color(0xFFAAAAFF)))
+            when (topState.value) {
+                Top.WhatsApp -> WhatsAppTop()
+                Top.Telegram -> TelegramTop()
+                Top.CollapsingTopBar -> MediumTopAppBar(
+                    title = { Text("Collapsing with Scrollable") },
+                    scrollBehavior = scrollBehavior
                 )
-            ) {
-                when (topState.value) {
-                    Top.WhatsApp -> WhatsAppTop()
-                    Top.Telegram -> TelegramTop()
-                    Top.Settings -> MediumTopAppBar(
-                        title = { Text("Settings") },
-                        scrollBehavior = scrollBehavior
-                    )
 
-                    else -> {}
-                }
+                else -> {}
             }
         },
         bottomBar = {
@@ -116,10 +110,16 @@ fun WithScaffold() {
                 }
             }
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.run {
+            if (topState.value == Top.CollapsingTopBar) {
+                nestedScroll(scrollBehavior.nestedScrollConnection)
+            } else {
+                this
+            }
+        },
     ) { innerPadding ->
         when (contentState.value) {
-            Content.LazyColumn -> {
+            Content.Scrollable -> {
                 LazyColumn(contentPadding = innerPadding) {
                     items(21) {
                         Box(
@@ -151,6 +151,25 @@ fun WithScaffold() {
             Content.BigTextField -> {}
             else -> {}
         }
+
+        Box(
+            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)
+                .padding(top = innerPadding.calculateTopPadding())
+        ) {
+            SwitchStates(Top.values(), topState.value, Modifier.align(Alignment.TopEnd)) {
+                topState.value = it
+            }
+            SwitchStates(
+                Content.values(),
+                contentState.value,
+                Modifier.align(Alignment.CenterEnd)
+            ) {
+                contentState.value = it
+            }
+            SwitchStates(Bottom.values(), bottomState.value, Modifier.align(Alignment.BottomEnd)) {
+                bottomState.value = it
+            }
+        }
     }
 
     if (contentState.value == Content.KeyboardInset) {
@@ -158,18 +177,6 @@ fun WithScaffold() {
     }
     if (contentState.value == Content.SafeAreaInset) {
         ContentSafeAreaInset()
-    }
-
-    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)) {
-        SwitchStates(Top.values(), topState.value, Modifier.align(Alignment.TopEnd)) {
-            topState.value = it
-        }
-        SwitchStates(Content.values(), contentState.value, Modifier.align(Alignment.CenterEnd)) {
-            contentState.value = it
-        }
-        SwitchStates(Bottom.values(), bottomState.value, Modifier.align(Alignment.BottomEnd)) {
-            bottomState.value = it
-        }
     }
 
 }
@@ -242,26 +249,34 @@ fun WhatsAppTop() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelegramTop() {
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            Row {
-                Icon(Icons.Default.ArrowBack, null, tint = Color.Blue)
-                Text("Back", color = Color.Blue)
-            }
-        },
-        title = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Some Name", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("last seen 3 hours ago", fontSize = 10.sp)
-            }
-        },
-        actions = {
-            val modifier = Modifier.padding(horizontal = 10.dp)
-            Icon(Icons.Outlined.Phone, null, modifier, Color.Blue)
-            Icon(Icons.Outlined.Edit, null, modifier, Color.Blue)
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color.Transparent
+    Box(
+        Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.horizontalGradient(listOf(Color.Green.copy(0.5f), Color.Blue.copy(0.5f)))
+            )
+    ) {
+        CenterAlignedTopAppBar(
+            navigationIcon = {
+                Row {
+                    Icon(Icons.Default.ArrowBack, null, tint = Color.Blue)
+                    Text("Back", color = Color.Blue)
+                }
+            },
+            title = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Some Name", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("last seen 3 hours ago", fontSize = 10.sp)
+                }
+            },
+            actions = {
+                val modifier = Modifier.padding(horizontal = 10.dp)
+                Icon(Icons.Outlined.Phone, null, modifier, Color.Blue)
+                Icon(Icons.Outlined.Edit, null, modifier, Color.Blue)
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.Transparent
+            )
         )
-    )
+    }
 }
