@@ -20,6 +20,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -154,9 +155,8 @@ fun WithScaffold() {
 
         Box(
             Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)
-                .padding(top = innerPadding.calculateTopPadding())
         ) {
-            SwitchStates(Top.values(), topState.value, Modifier.align(Alignment.TopEnd)) {
+            SwitchStates(Top.values(), topState.value, Modifier.padding(innerPadding).align(Alignment.TopEnd)) {
                 topState.value = it
             }
             SwitchStates(
@@ -166,7 +166,7 @@ fun WithScaffold() {
             ) {
                 contentState.value = it
             }
-            SwitchStates(Bottom.values(), bottomState.value, Modifier.align(Alignment.BottomEnd)) {
+            SwitchStates(Bottom.values(), bottomState.value, Modifier.padding(innerPadding).align(Alignment.BottomEnd)) {
                 bottomState.value = it
             }
         }
@@ -195,19 +195,21 @@ fun ContentKeyboardInset() = Box(Modifier.fillMaxSize()) {
         BasicTextField("Show keyboard", {}, Modifier.background(Color.Green.copy(0.3f)))
     }
     Text(
-        "ime (keyboard) inset",
-        Modifier.align(Alignment.BottomCenter)
+        "WindowInsets.ime",
+        Modifier.align(Alignment.BottomStart)
+            .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.ime)
             .background(Color.Green.copy(0.5f))
+            .padding(bottom = 5.dp)
     )
 }
 
 @Composable
-fun ContentSafeAreaInset() = Box(Modifier.fillMaxSize().background(Color.Red.copy(0.3f))) {
+fun ContentSafeAreaInset() = Box(Modifier.fillMaxSize().background(Color.Red.copy(0.2f))) {
     Box(
         Modifier.fillMaxSize()
             .windowInsetsPadding(WindowInsets.commonSafeArea)
-            .background(Color.Green.copy(0.5f))
+            .background(Color.Green.copy(0.4f))
     )
 }
 
@@ -249,12 +251,11 @@ fun WhatsAppTop() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelegramTop() {
+    val bgColor = MaterialTheme.colorScheme.background
+    val green = Color.Green.copy(0.5f).compositeOver(bgColor)
+    val blue = Color.Blue.copy(0.5f).compositeOver(bgColor)
     Box(
-        Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .background(
-                Brush.horizontalGradient(listOf(Color.Green.copy(0.5f), Color.Blue.copy(0.5f)))
-            )
+        Modifier.background(Brush.horizontalGradient(listOf(green, blue)))
     ) {
         CenterAlignedTopAppBar(
             navigationIcon = {
