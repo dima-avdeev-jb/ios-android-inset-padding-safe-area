@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -66,7 +65,6 @@ fun WithMaterialThemeAndScaffold() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WithScaffold() {
-    val isScrollableState = remember { mutableStateOf(false) }
     val isScaffoldPaddingState = remember { mutableStateOf(false) }
     val isKeyboardInsetState = remember { mutableStateOf(false) }
     val isSafeAreaInsetState = remember { mutableStateOf(false) }
@@ -75,13 +73,13 @@ fun WithScaffold() {
 
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         topBar = {
             when (topState.value) {
                 Top.TopBarBasic -> TopBarBasic()
                 Top.TopBarWithGradient -> TopBarWithGradient()
                 Top.CollapsingTopBar -> MediumTopAppBar(
-                    title = { Text("Collapsing with Scrollable content") },
+                    title = { Text("Collapsing with Chat content") },
                     scrollBehavior = scrollBehavior
                 )
 
@@ -91,7 +89,7 @@ fun WithScaffold() {
         bottomBar = {
             when (bottomState.value) {
                 Bottom.Empty -> {}
-                Bottom.Tabs -> BottomAppBar() {
+                Bottom.Tabs -> BottomAppBar {
                     val tabState = remember { mutableStateOf(0) }
                     TabRow(selectedTabIndex = tabState.value) {
                         listOf(
@@ -118,16 +116,6 @@ fun WithScaffold() {
             }
         },
     ) { innerPadding ->
-        if (isScrollableState.value) {
-            LazyColumn(contentPadding = innerPadding) {
-                items(21) {
-                    Box(
-                        Modifier.height(100.dp).fillMaxWidth()
-                            .background(Color(Random.nextInt()).copy(0.2f))
-                    ) { Text("Lazy item $it") }
-                }
-            }
-        }
         if (isScaffoldPaddingState.value) {
             ContentScaffoldPadding(innerPadding)
         }
@@ -160,7 +148,6 @@ fun WithScaffold() {
                         Text(text)
                         Switch(state.value, { state.value = it }, Modifier.scale(0.5f))
                     }
-                SwitchBooleanState(isScrollableState, "Scrollable")
                 SwitchBooleanState(isScaffoldPaddingState, "ScaffoldPadding")
                 SwitchBooleanState(isKeyboardInsetState, "KeyboardInset")
                 SwitchBooleanState(isSafeAreaInsetState, "SafeAreaInset")
@@ -215,7 +202,7 @@ fun ContentChat(innerPadding: PaddingValues) {
         mutableStateListOf(*messagesArray)
     }
     Column(Modifier.fillMaxSize().padding(innerPadding)) {
-        LazyColumn(contentPadding = innerPadding) {
+        LazyColumn(Modifier.weight(1f)) {
             items(messagesState) {
                 Row(
                     Modifier.padding(5.dp).background(Color.Green.copy(0.3f)).padding(5.dp),
@@ -226,46 +213,38 @@ fun ContentChat(innerPadding: PaddingValues) {
                 }
             }
         }
-        SendMessage(Modifier) {
-
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SendMessage(modifier: Modifier = Modifier, sendMessage: (String) -> Unit) {
-    var inputText by remember { mutableStateOf("") }
-    OutlinedTextField(
-        modifier = modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background.copy(0.7f))
-            .padding(10.dp),
-        value = inputText,
-        placeholder = {
-            Text("type message here")
-        },
-        onValueChange = {
-            inputText = it
-        },
-        trailingIcon = {
-            if (inputText.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.clickable {
-                            sendMessage(inputText)
+        var inputText by remember { mutableStateOf("") }
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth()
+                .background(Color.Yellow.copy(0.3f))
+                .padding(10.dp),
+            value = inputText,
+            placeholder = {
+                Text("type message here")
+            },
+            onValueChange = {
+                inputText = it
+            },
+            trailingIcon = {
+                if (inputText.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.clickable {
+                            messagesState.add(inputText)
                             inputText = ""
                         }
-                        .padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Send",
-                    )
-                    Text("Send")
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send",
+                        )
+                        Text("Send")
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
