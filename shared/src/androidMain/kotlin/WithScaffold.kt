@@ -9,6 +9,9 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.*
@@ -31,11 +34,11 @@ import androidx.compose.ui.unit.sp
 import kotlin.random.Random
 
 val themeState = mutableStateOf(Theme.SystemTheme)
-val topState = mutableStateOf(Top.Telegram)
+val topState = mutableStateOf(Top.TopBarWithGradient)
 val bottomState = mutableStateOf(Bottom.Empty)
 
 enum class Theme { SystemTheme, DarkTheme, LightTheme, }
-enum class Top { Empty, WhatsApp, Telegram, CollapsingTopBar, }
+enum class Top { Empty, TopBarBasic, TopBarWithGradient, CollapsingTopBar, }
 enum class Bottom { Empty, Tabs, }
 
 @Composable
@@ -67,10 +70,10 @@ fun WithScaffold() {
     androidx.compose.material3.Scaffold(
         topBar = {
             when (topState.value) {
-                Top.WhatsApp -> WhatsAppTop()
-                Top.Telegram -> TelegramTop()
+                Top.TopBarBasic -> TopBarBasic()
+                Top.TopBarWithGradient -> TopBarWithGradient()
                 Top.CollapsingTopBar -> MediumTopAppBar(
-                    title = { Text("Collapsing with Scrollable") },
+                    title = { Text("Collapsing with Scrollable content") },
                     scrollBehavior = scrollBehavior
                 )
 
@@ -80,12 +83,22 @@ fun WithScaffold() {
         bottomBar = {
             when (bottomState.value) {
                 Bottom.Empty -> {}
-                Bottom.Tabs -> BottomAppBar {
-                    Box(
-                        Modifier.height(50.dp)
-                            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                            .fillMaxWidth().background(Color.White.copy(0.4f))
-                    )
+                Bottom.Tabs -> BottomAppBar() {
+                    val tabState = remember { mutableStateOf(0) }
+                    TabRow(selectedTabIndex = tabState.value) {
+                        listOf(
+                            "Home" to Icons.Default.Home,
+                            "Star" to Icons.Default.Star,
+                            "Settings" to Icons.Default.Settings,
+                        ).forEachIndexed { index, pair ->
+                            Tab(
+                                text = { Text(pair.first) },
+                                selected = tabState.value == index,
+                                onClick = { tabState.value = index },
+                                icon = { Icon(pair.second, null) }
+                            )
+                        }
+                    }
                 }
             }
         },
@@ -125,7 +138,8 @@ fun WithScaffold() {
         }
 
         Box(
-            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea).padding(innerPadding)
+            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)
+                .padding(innerPadding)
         ) {
             SwitchEnumState(
                 Top.values(),
@@ -219,7 +233,7 @@ fun <T> SwitchEnumState(values: Array<T>, state: MutableState<T>, modifier: Modi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WhatsAppTop() {
+fun TopBarBasic() {
     CenterAlignedTopAppBar(
         navigationIcon = {
             Text("Edit", color = Color.Blue)
@@ -235,7 +249,7 @@ fun WhatsAppTop() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelegramTop() {
+fun TopBarWithGradient() {
     val bgColor = MaterialTheme.colorScheme.background
     val green = Color.Green.copy(0.5f).compositeOver(bgColor)
     val blue = Color.Blue.copy(0.5f).compositeOver(bgColor)
