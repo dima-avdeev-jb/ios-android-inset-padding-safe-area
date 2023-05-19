@@ -30,48 +30,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.random.Random
 
-enum class Theme {
-    SystemTheme,
-    DarkTheme,
-    LightTheme,
-}
+val themeState = mutableStateOf(Theme.SystemTheme)
+val topState = mutableStateOf(Top.Telegram)
+val bottomState = mutableStateOf(Bottom.Empty)
 
-enum class Top {
-    Empty,
-    WhatsApp,
-    Telegram,
-    CollapsingTopBar,
-}
-
-enum class Content {
-    Scrollable,
-    ScaffoldPadding,
-    KeyboardInset,
-    SafeAreaInset,
-    Chat,
-    BigTextField,
-}
-
-enum class Bottom {
-    Empty,
-    Tabs,
-}
+enum class Theme { SystemTheme, DarkTheme, LightTheme, }
+enum class Top { Empty, WhatsApp, Telegram, CollapsingTopBar, }
+enum class Bottom { Empty, Tabs, }
 
 @Composable
 fun WithMaterialThemeAndScaffold() {
-    val themeState = remember { mutableStateOf(Theme.SystemTheme) }
     val isDarkTheme = when (themeState.value) {
         Theme.SystemTheme -> isSystemInDarkTheme()
         Theme.DarkTheme -> true
         Theme.LightTheme -> false
     }
-
     Box(Modifier.fillMaxSize()) {
         MaterialTheme(colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()) {
             WithScaffold()
-            Box(Modifier.fillMaxSize()) {
-                SwitchStates(Theme.values(), themeState, Modifier.align(Alignment.CenterStart))
-            }
         }
     }
 }
@@ -79,9 +55,6 @@ fun WithMaterialThemeAndScaffold() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WithScaffold() {
-    val topState = remember { mutableStateOf(Top.Telegram) }
-    val bottomState = remember { mutableStateOf(Bottom.Empty) }
-
     val isScrollableState = remember { mutableStateOf(false) }
     val isScaffoldPaddingState = remember { mutableStateOf(false) }
     val isKeyboardInsetState = remember { mutableStateOf(false) }
@@ -134,7 +107,7 @@ fun WithScaffold() {
                 }
             }
         }
-        if(isScaffoldPaddingState.value) {
+        if (isScaffoldPaddingState.value) {
             Box(Modifier.fillMaxSize()) {
                 Text(
                     "Scaffold innerPadding from top",
@@ -152,30 +125,44 @@ fun WithScaffold() {
         }
 
         Box(
-            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea)
+            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.commonSafeArea).padding(innerPadding)
         ) {
-            SwitchStates(Top.values(), topState, Modifier.padding(innerPadding).align(Alignment.TopEnd))
-            Column(Modifier.align(Alignment.CenterEnd).background(Color.Blue.copy(0.3f)).padding(2.dp).border(1.dp, Color.Blue).padding(2.dp), horizontalAlignment = Alignment.End) {
+            SwitchEnumState(
+                Top.values(),
+                topState,
+                Modifier.align(Alignment.TopEnd)
+            )
+            Column(
+                Modifier.align(Alignment.CenterEnd).background(Color.Blue.copy(0.3f)).padding(2.dp)
+                    .border(1.dp, Color.Blue).padding(2.dp),
+                horizontalAlignment = Alignment.End
+            ) {
                 @Composable
-                fun SwitchState(state: MutableState<Boolean>, text: String) = Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(text)
-                    Switch(state.value, { state.value = it }, Modifier.scale(0.5f))
-                }
-                SwitchState(isScrollableState, "Scrollable")
-                SwitchState(isScaffoldPaddingState, "ScaffoldPadding")
-                SwitchState(isKeyboardInsetState, "KeyboardInset")
-                SwitchState(isSafeAreaInsetState, "SafeAreaInset")
-                SwitchState(isChatState, "Chat")
-                SwitchState(isBigTextFieldState, "BigTextField")
+                fun SwitchBooleanState(state: MutableState<Boolean>, text: String) =
+                    Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(text)
+                        Switch(state.value, { state.value = it }, Modifier.scale(0.5f))
+                    }
+                SwitchBooleanState(isScrollableState, "Scrollable")
+                SwitchBooleanState(isScaffoldPaddingState, "ScaffoldPadding")
+                SwitchBooleanState(isKeyboardInsetState, "KeyboardInset")
+                SwitchBooleanState(isSafeAreaInsetState, "SafeAreaInset")
+                SwitchBooleanState(isChatState, "Chat")
+                SwitchBooleanState(isBigTextFieldState, "BigTextField")
             }
-            SwitchStates(Bottom.values(), bottomState, Modifier.padding(innerPadding).align(Alignment.BottomEnd))
+            SwitchEnumState(
+                Bottom.values(),
+                bottomState,
+                Modifier.align(Alignment.BottomEnd)
+            )
+            SwitchEnumState(Theme.values(), themeState, Modifier.align(Alignment.CenterStart))
         }
     }
 
-    if(isSafeAreaInsetState.value) {
+    if (isSafeAreaInsetState.value) {
         ContentSafeAreaInset()
     }
-    if(isKeyboardInsetState.value) {
+    if (isKeyboardInsetState.value) {
         ContentKeyboardInset()
     }
 
@@ -214,7 +201,7 @@ fun ContentSafeAreaInset() = Box(Modifier.fillMaxSize().background(Color.Red.cop
 }
 
 @Composable
-fun <T> SwitchStates(values: Array<T>, state: MutableState<T>, modifier: Modifier) {
+fun <T> SwitchEnumState(values: Array<T>, state: MutableState<T>, modifier: Modifier) {
     Column(modifier.background(MaterialTheme.colorScheme.surface).width(IntrinsicSize.Min)) {
         values.forEach {
             Text(
