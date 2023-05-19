@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Edit
@@ -20,9 +21,11 @@ import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -203,15 +206,15 @@ fun ContentScaffoldPadding(innerPadding: PaddingValues) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentChat(innerPadding: PaddingValues) {
-    Box(Modifier.fillMaxSize()) {
-        val messagesState = remember {
-            val messagesArray = buildList {
-                repeat(20) {
-                    add("Message $it")
-                }
-            }.toTypedArray()
-            mutableStateListOf(*messagesArray)
-        }
+    val messagesState = remember {
+        val messagesArray = buildList {
+            repeat(20) {
+                add("Message $it")
+            }
+        }.toTypedArray()
+        mutableStateListOf(*messagesArray)
+    }
+    Column(Modifier.fillMaxSize().padding(innerPadding)) {
         LazyColumn(contentPadding = innerPadding) {
             items(messagesState) {
                 Row(
@@ -223,8 +226,46 @@ fun ContentChat(innerPadding: PaddingValues) {
                 }
             }
         }
+        SendMessage(Modifier) {
 
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SendMessage(modifier: Modifier = Modifier, sendMessage: (String) -> Unit) {
+    var inputText by remember { mutableStateOf("") }
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background.copy(0.7f))
+            .padding(10.dp),
+        value = inputText,
+        placeholder = {
+            Text("type message here")
+        },
+        onValueChange = {
+            inputText = it
+        },
+        trailingIcon = {
+            if (inputText.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.clickable {
+                            sendMessage(inputText)
+                            inputText = ""
+                        }
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "Send",
+                    )
+                    Text("Send")
+                }
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
