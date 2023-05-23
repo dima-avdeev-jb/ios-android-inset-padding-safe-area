@@ -82,7 +82,6 @@ fun WithMaterialThemeAndScaffold() {
 fun WithScaffold() {
     val isScaffoldPaddingState = rememberSaveable { mutableStateOf(false) }
     val isInsetsState = rememberSaveable { mutableStateOf(false) }
-    val isSafeAreaInsetState = rememberSaveable { mutableStateOf(false) }
     val isChatState = rememberSaveable { mutableStateOf(false) }
     val isBigTextFieldState = rememberSaveable { mutableStateOf(false) }
 
@@ -165,7 +164,6 @@ fun WithScaffold() {
                     }
                 SwitchBooleanState(isScaffoldPaddingState, "ScaffoldPadding")
                 SwitchBooleanState(isInsetsState, "Insets")
-                SwitchBooleanState(isSafeAreaInsetState, "SafeAreaInset")
                 SwitchBooleanState(isChatState, "Chat")
                 SwitchBooleanState(isBigTextFieldState, "BigTextField")
             }
@@ -178,9 +176,6 @@ fun WithScaffold() {
         }
     }
 
-    if (isSafeAreaInsetState.value) {
-        ContentSafeAreaInset()
-    }
     if (isInsetsState.value) {
         ContentInsets()
     }
@@ -323,15 +318,6 @@ fun ContentInsets() = Box(Modifier.fillMaxSize()) {
         )
         BasicTextField("Show keyboard", {}, Modifier.background(Color.Green.copy(0.3f)))
     }
-}
-
-@Composable
-fun ContentSafeAreaInset() = Box(Modifier.fillMaxSize().background(Color.Red.copy(0.2f))) {
-    Box(
-        Modifier.fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .background(Color.Green.copy(0.4f))
-    )
 }
 
 @Composable
