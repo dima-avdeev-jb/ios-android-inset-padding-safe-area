@@ -64,7 +64,7 @@ enum class Insets {
 }
 
 @Composable
-fun WithMaterialThemeAndScaffold() {
+fun ApplicationLayoutExamples() {
     val isDarkTheme = when (themeState.value) {
         Theme.SystemTheme -> isSystemInDarkTheme()
         Theme.DarkTheme -> true
