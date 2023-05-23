@@ -139,7 +139,7 @@ fun WithScaffold() {
         }
 
         if (isBigTextFieldState.value) {
-            ContentBigText(innerPadding)
+            ContentBigTextField(innerPadding)
         }
 
         Box(
@@ -259,7 +259,7 @@ fun ContentChat(innerPadding: PaddingValues) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContentBigText(innerPadding: PaddingValues) {
+fun ContentBigTextField(innerPadding: PaddingValues) {
     val textState = remember {
         mutableStateOf(
             buildString {
@@ -345,7 +345,7 @@ fun <T> SwitchEnumState(values: Array<T>, state: MutableState<T>, modifier: Modi
 fun TopBarBasic() {
     CenterAlignedTopAppBar(
         navigationIcon = {
-            Text("Edit", color = Color.Blue)
+            Text("Text", color = Color.Blue)
         },
         title = { Text("Chats", fontWeight = FontWeight.Bold) },
         actions = {
